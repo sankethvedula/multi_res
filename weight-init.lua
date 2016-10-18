@@ -30,6 +30,7 @@ end
 -- "Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification"
 -- Kaiming He, 2015
 local function w_init_kaiming(fan_in, fan_out)
+  --print("initialization done")
    return math.sqrt(4/(fan_in + fan_out))
 end
 
@@ -63,7 +64,7 @@ local function w_init(net, arg)
       elseif m.__typename == 'nn.Linear' then
          m:reset(method(m.weight:size(2), m.weight:size(1)))
       elseif m.__typename == 'nn.TemporalConvolution' then
-         m:reset(method(m.weight:size(2), m.weight:size(1)))            
+         m:reset(method(m.weight:size(2), m.weight:size(1)))
       end
 
       if m.bias then
