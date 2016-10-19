@@ -8,17 +8,18 @@ require "cunn"
 
 
 
-local function branch_conv_net(input_channels, output_channels,stride,pooling)
+local function branch_conv_net(input_channels, output_channels,kernel_size,pooling)
+    padding_size = (kernel_size-1)/2
     branch = nn.Sequential()
     --branch2 = nn.Sequential()
-    branch:add(nn.SpatialConvolution(input_channels,output_channels,stride,stride,1,1,7,7))
+    branch:add(nn.SpatialConvolution(input_channels,output_channels,kernel_size,kernel_size,1,1,padding_size,padding_size))
     --branch = require('weight-init')(branch,'kaiming')
     --branch:add(branch1)
     branch:add(nn.ReLU())
 
     branch:add(nn.SpatialMaxPooling(2,2))
 
-    branch:add(nn.SpatialConvolution(output_channels,input_channels,stride,stride,1,1,7,7))
+    branch:add(nn.SpatialConvolution(output_channels,input_channels,kernel_size,kernel_size,1,1,padding_size,padding_size))
     --branch2 = require('weight-init')(branch2,'kaiming')
     --branch:add(branch2)
     branch:add(nn.ReLU())
@@ -39,15 +40,15 @@ input_table = {
 branch1 = nn.Sequential()
 
 conv1 = nn.Sequential()
-conv1:add(nn.SpatialConvolution(1,16,15,15,1,1,7,7))
+conv1:add(nn.SpatialConvolution(1,16,7,7,1,1,3,3))
 conv1:add(nn.ReLU())
 conv1:add(nn.SpatialMaxPooling(2,2))
 conv1 = require('weight-init')(conv1,'kaiming')
 -- Concating upper
 upper = nn.ConcatTable()
 -- Children upper
-child1_subconv1 = branch_conv_net(16,32,15,true)
-child2_subconv1 = branch_conv_net(16,32,15,true)
+child1_subconv1 = branch_conv_net(16,32,5,true)
+child2_subconv1 = branch_conv_net(16,32,5,true)
 
 --merge1 = nn.ParallelTable(2,1)
 --merge1:add(nn.SpatialConvolution(32,64,4,4)):add(nn.ReLU())
@@ -55,7 +56,7 @@ child2_subconv1 = branch_conv_net(16,32,15,true)
 
 merge1 = nn.JoinTable(2)
 final_conv1 = nn.Sequential()
-final_conv1:add(nn.SpatialConvolution(32,1,7,7,1,1,3,3)):add(nn.ReLU()):add(nn.SpatialUpSamplingNearest(2))
+final_conv1:add(nn.SpatialConvolution(32,1,3,3,1,1,1,1)):add(nn.ReLU()):add(nn.SpatialUpSamplingNearest(2))
 final_conv1 = require('weight-init')(final_conv1,'kaiming')
 
 upper:add(child1_subconv1)
@@ -74,7 +75,7 @@ branch1:add(final_conv1)
 branch2 = nn.Sequential()
 
 conv2 = nn.Sequential()
-conv2:add(nn.SpatialConvolution(1,16,15,15,1,1,7,7))
+conv2:add(nn.SpatialConvolution(1,16,7,7,1,1,3,3))
 conv2:add(nn.ReLU()):add(nn.SpatialMaxPooling(2,2))
 conv2 = require('weight-init')(conv2,'kaiming')
 
@@ -82,12 +83,12 @@ conv2 = require('weight-init')(conv2,'kaiming')
 
 lower = nn.ConcatTable()
 
-child1_subconv2 = branch_conv_net(16,32,15,true)
-child2_subconv2 = branch_conv_net(16,32,15,true)
+child1_subconv2 = branch_conv_net(16,32,5,true)
+child2_subconv2 = branch_conv_net(16,32,5,true)
 
 merge2 = nn.JoinTable(2)
 final_conv2 = nn.Sequential()
-final_conv2:add(nn.SpatialConvolution(32,1,7,7,1,1,3,3)):add(nn.ReLU()):add(nn.SpatialUpSamplingNearest(2))
+final_conv2:add(nn.SpatialConvolution(32,1,3,3,1,1,1,1)):add(nn.ReLU()):add(nn.SpatialUpSamplingNearest(2))
 final_conv2 = require('weight-init')(final_conv2,'kaiming')
 
 
@@ -137,8 +138,8 @@ fc1:cuda()
 --for i = 1,10000 do
 
 --0print(i)
---out = fc1:forward(input_table)
---print(out)
+out = fc1:forward(input_table)
+print(out:size())
 
 --print(params:size())
 --print(out)

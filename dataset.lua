@@ -33,27 +33,37 @@ fc1 = multi_res_model()
 print("Loaded the network")
 -- Setting the parameters
 x, dl_dx = fc1:getParameters()
-
+print(x:size())
 print("Got the parameters")
 x:cuda()
 dl_dx:cuda()
 
 local function get_data(i)
   input_1_filename = "./data/data/"..(i)..".png"
-  --print(input_1_filename)
   input_2_filename = "./data/data/"..(i+2)..".png"
   output_filename = "./data/data/"..(i+1)..".png"
 
-  input_1 = image.load(input_1_filename,1,'byte')
-  input_2 = image.load(input_2_filename,1,'byte')
+  if i == 1 then
+    input_1_image = image.load(input_1_filename,1,'byte')
+    input_2_image = image.load(input_2_filename,1,'byte')
+    output_image = image.load(output_filename,1,'byte')
+  else
+    input_1_image:copy(output_image)
+    output_image:copy(input_2_image)
+    image_2 = image.load(input_2_filename,1,'byte')
+  end
 
+  input_1 = image.scale(input_1_image,350,350):double():mul(2./255.):add(-1):cuda()
+  input_2 = image.scale(input_2_image,350,350):double():mul(2./255.):add(-1):cuda()
+  --input_1 = image.scale(input_1,350,350):double():mul(1./255.):cuda()
+  --input_2 = image.scale(input_2,350,350):double():mul(1./255.):cuda()
 
-  input_1 = image.scale(input_1,350,350):double():mul(2./255.):add(-1):cuda()
-  input_2 = image.scale(input_2,350,350):double():mul(2./255.):add(-1):cuda()
+  --image.display(input_1)
+  --image.display(input_2)
 
-  output = image.load(output_filename,1,'float')
-  output = image.scale(output,348,348):double():mul(2./255.):add(-1):cuda()
-
+  output = image.scale(output_image,348,348):double():mul(2./255.):add(-1):cuda()
+  --output = image.scale(output,348,348):double():mul(1./255.):cuda()
+  --image.display(output)
 
   --input_1 = torch.ones(350,350):cuda()
   --input_2 = torch.zeros(350,350):cuda()
@@ -61,7 +71,6 @@ local function get_data(i)
   --output = torch.ones(348,348):cuda()
 
   return input_1,input_2,output
-
 end
 
 
@@ -125,7 +134,7 @@ local function single_epoch(x,dl_dx)
 
   optim_params = {learningRate = 0.01}
   total_err = 0
-  for number = 1,500 do
+  for number = 1,7000 do
     input_1, input_2, output = get_data(number)
     --print("got the data")
     input_table, output = processed_data(input_1,input_2,output)
@@ -138,7 +147,7 @@ local function single_epoch(x,dl_dx)
   end
   --print(total_err/100)
 
-  return total_err/500
+  return total_err/7000
 end
 
 
