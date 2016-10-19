@@ -138,8 +138,8 @@ fc1:cuda()
 --for i = 1,10000 do
 
 --0print(i)
-out = fc1:forward(input_table)
-print(out:size())
+--out = fc1:forward(input_table)
+--print(out:size())
 
 --print(params:size())
 --print(out)

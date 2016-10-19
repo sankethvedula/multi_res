@@ -38,20 +38,31 @@ print("Got the parameters")
 x:cuda()
 dl_dx:cuda()
 
-local function get_data(i)
-  input_1_filename = "./data/data/"..(i)..".png"
-  input_2_filename = "./data/data/"..(i+2)..".png"
-  output_filename = "./data/data/"..(i+1)..".png"
+train_data = torch.load("train_data.t7")
+print("Loaded Training Data")
 
-  if i == 1 then
-    input_1_image = image.load(input_1_filename,1,'byte')
-    input_2_image = image.load(input_2_filename,1,'byte')
-    output_image = image.load(output_filename,1,'byte')
-  else
-    input_1_image:copy(output_image)
-    output_image:copy(input_2_image)
-    image_2 = image.load(input_2_filename,1,'byte')
-  end
+
+local function get_data(i)
+  --input_1_filename = "./data/data/"..(i)..".png"
+  --input_2_filename = "./data/data/"..(i+2)..".png"
+  --output_filename = "./data/data/"..(i+1)..".png"
+	input_1_filename = i
+	input_2_filename = i+2
+	output_filename = i+1
+  --print(i)
+  --if i == 1 then
+    --input_1_image = image.load(input_1_filename,1,'byte')
+		input_1_image = train_data[input_1_filename]
+		--input_2_image = image.load(input_2_filename,1,'byte')
+		input_2_image = train_data[input_2_filename]
+		output_image = train_data[output_filename]
+
+		--output_image = image.load(output_filename,1,'byte')
+  --else
+    --input_1_image:copy(output_image)
+    --output_image:copy(input_2_image)
+    --image_2 = image.load(input_2_filename,1,'byte')
+  --end
 
   input_1 = image.scale(input_1_image,350,350):double():mul(2./255.):add(-1):cuda()
   input_2 = image.scale(input_2_image,350,350):double():mul(2./255.):add(-1):cuda()
@@ -134,6 +145,9 @@ local function single_epoch(x,dl_dx)
 
   optim_params = {learningRate = 0.01}
   total_err = 0
+
+  no_of_examples = 1000000
+
   for number = 1,7000 do
     input_1, input_2, output = get_data(number)
     --print("got the data")
