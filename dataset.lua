@@ -143,12 +143,13 @@ local function single_epoch(x,dl_dx)
       return loss, dl_dx
     end
 
+
   optim_params = {learningRate = 0.01}
   total_err = 0
 
   no_of_examples = 1000000
 
-  for number = 1,7000 do
+  for number = 1,9998 do
     input_1, input_2, output = get_data(number)
     --print("got the data")
     input_table, output = processed_data(input_1,input_2,output)
@@ -161,15 +162,19 @@ local function single_epoch(x,dl_dx)
   end
   --print(total_err/100)
 
-  return total_err/7000
+  return total_err/9998
 end
 
 
-for i = 1,10 do
+for i = 1,100 do
   --print(i)
   fc1:training()
   total_err = single_epoch(x,dl_dx)
   print("Epoch number  "..i.."  Training Error:  "..total_err)
+	if i%20 == 0 then
+		torch.save("Multi_ResNet_itr_"..i..".t7",fc1)
+	end
+
 
 end
 
