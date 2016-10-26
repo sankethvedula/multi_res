@@ -37,11 +37,12 @@ end
 
 train_logger = optim.Logger('train_error.log')
 validation_logger = optim.Logger('validation_error.log')
+super_train_logger = optim.Logger('super_train_logger.log')
 
 train_logger:setNames{'train_error'}
 validation_logger:setNames{'validation_error'}
 
-super_train_logger:setNames('super_train_error')
+super_train_logger:setNames{'super_train_error'}
 
 -- Import Network
 fc1 = multi_res_model()
@@ -154,7 +155,7 @@ local function single_epoch(x,dl_dx)
       --print(input_table)
       dl_dx:zero()
       predicted_output = fc1:forward(input_table)
-      print(predicted_output:size())
+      --print(predicted_output:size())
       loss = criterion:forward(predicted_output, output)
       grad_outs = criterion:backward(predicted_output, output)
 
@@ -177,8 +178,8 @@ local function single_epoch(x,dl_dx)
     --print(output:size())
     local _,errs = optim.adam(feval, x, optim_params)
     --print(errs[1])
-		super_train_logger:add(errs[1])
-    total_err = total_err + errs[1]
+		super_train_logger:add{errs[1]}
+		total_err = total_err + errs[1]
   end
   --print(total_err/100)
 
@@ -215,8 +216,8 @@ for i = 1,100 do
 	fc1:evaluate()
 	validation_err = validation_epoch(validation_data)
 	validation_err = tostring(validation_err)
-	train_logger:add(training_loss)
-	validation_logger:add(validation_err)
+	train_logger:add{training_loss}
+	validation_logger:add{validation_err}
 
 end
 
