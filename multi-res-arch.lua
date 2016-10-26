@@ -89,7 +89,7 @@ upper = nn.ConcatTable()
 -- Children upper
 child1_subconv1 = branch_conv_net(16,32,16,true)
 child2_subconv1 = branch_conv_net(16,32,16,true)
-
+shortcut_1 = nn.Sequential():add(nn.Identity())
 --merge1 = nn.ParallelTable(2,1)
 --merge1:add(nn.SpatialConvolution(32,64,4,4)):add(nn.ReLU())
 --merge1:add(nn.SpatialConvolution(32,64,4,4)):add(nn.ReLU())
@@ -100,6 +100,7 @@ final_conv1:add(nn.SpatialConvolution(32,1,8,8,1,1,3,3)):add(nn.ReLU()):add(nn.S
 
 upper:add(child1_subconv1)
 upper:add(child2_subconv1)
+upper:add(shortcut_1)
 
 --
 
@@ -124,12 +125,15 @@ lower = nn.ConcatTable()
 child1_subconv2 = branch_conv_net(16,32,16,true)
 child2_subconv2 = branch_conv_net(16,32,16,true)
 
+shortcut_2 = nn.Sequential():add(nn.Identity())
+
 merge2 = nn.JoinTable(2)
 final_conv2 = nn.Sequential()
 final_conv2:add(nn.SpatialConvolution(32,1,8,8,1,1,3,3)):add(nn.ReLU()):add(nn.SpatialUpSamplingNearest(2))
 
 lower:add(child1_subconv2)
 lower:add(child2_subconv2)
+lower:add(shortcut_2)
 
 branch2:add(conv2)
 branch2:add(lower)
