@@ -4,6 +4,9 @@ require "cunn"
 require "image"
 -- Enter the file number
 file_number = 1083
+i = 80
+net_name = "Multi_ResNet_adagrad_itr_"..i..".t7"
+net = torch.load(net_name)
 
 for file_number = 1,1000 do
 print(file_number)
@@ -41,11 +44,9 @@ output_image = image.load(output_filename,1,'byte')
 
 -- Let's get our network
 --for i = 20,100,20 do
-  i = 40
-  net_name = "Multi_ResNet_adagrad_itr_"..i..".t7"
-  net = torch.load(net_name)
+
   pred_out = net:forward(input_data)
   disp_out = output_net:forward(pred_out):add(1):mul(255./2.):byte()
-  image.save("./adagrad_out/"..(file_number)..".png",disp_out)
+  image.save("./skip_data/"..(file_number)..".png",disp_out)
 
 end
